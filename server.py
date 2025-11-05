@@ -19,8 +19,6 @@ current_document = ""
 def load_document():
     """Loads the document from disk or initializes a new one."""
     global current_document
-    # Ensure the documents folder exists
-    os.makedirs('documents', exist_ok=True)
     
     if os.path.exists(DOC_PATH):
         with open(DOC_PATH, 'r') as f:
@@ -94,11 +92,13 @@ def handle_client(sock):
                     current_document = f"New document started by {user_id} at {time.strftime('%H:%M:%S')}."
                     with open(DOC_PATH, 'w') as f:
                         f.write(current_document)
-                        
+
+                newfile_msg = f"Document created by {user_id}."
+                print(newfile_msg)
                 # Broadcast the new empty state to everyone
                 broadcast_message({"type": "DOC_STATE", "content": current_document})
-                broadcast_message({"type": "NOTIFICATION", "message": f"{user_id} created a new file."})
-            
+                broadcast_message({"type": "NOTIFICATION", "message": newfile_msg})
+
             # --- Chat Logic ---
             elif msg_type == "CHAT":
                 chat_text = message.get("text", "")

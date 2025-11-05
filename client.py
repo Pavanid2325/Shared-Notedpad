@@ -11,6 +11,8 @@ HOST = '127.0.0.1'
 PORT = 8080
 GLOBAL_USER_ID = "Unauthenticated"
 client_socket = None
+# --- list of colors for dynamic assignment ---
+CHAT_COLORS = ['#FF0000', '#00AA00', '#0000FF', '#FF7F00', '#00AFCF', '#AA00FF', '#FF007F', '#800080', '#008000', '#8A2BE2']
 
 class NotepadClientApp:
     def __init__(self, master):
@@ -67,14 +69,22 @@ class NotepadClientApp:
 
         # Define tags for user colors and system messages
         user_tag = f"user_{user}"
-        if not self.chat_area.tag_cget(user_tag, 'foreground'):
-            # Assign a simple color for user name
-            color_map = {"SYSTEM": "red", "NOTIFICATION": "darkorange", "Alice": "blue", "Bob": "green"}
-            self.chat_area.tag_config(user_tag, foreground=color_map.get(user, color))
+        
+        static_color_map = {"SYSTEM": "red", "NOTIFICATION": "darkorange"}
+        if user in static_color_map:
+            user_color = static_color_map[user]
+        else:
+            hash_val = hash(user)
+            color_index = hash_val % len(CHAT_COLORS) # Use modulo
+            user_color = CHAT_COLORS[color_index]
+
+        self.chat_area.tag_config(user_tag, foreground=user_color)
+        # We also need to define the 'time' tag
+        self.chat_area.tag_config("time", foreground="grey")
 
         # Insert message
         self.chat_area.insert(tk.END, f"[{time.strftime('%H:%M:%S')}] ", "time")
-        self.chat_area.insert(tk.END, f"<{user}>: ", user_tag)
+        self.chat_area.insert(tk.END, f"{user}: ", user_tag)
         self.chat_area.insert(tk.END, f"{text}\n")
 
         self.chat_area.yview(tk.END) 
